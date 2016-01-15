@@ -419,7 +419,7 @@ mkXPromptWithModes modes conf = do
                        , W.up = []
                        , W.down = tail modes --other modes
                        }
-    st = initState d rw w s (XPMultipleModes modeStack) gc fs hs conf { alwaysHighlight = True} numlock
+    st = initState d rw w s (XPMultipleModes modeStack) gc fs hs conf numlock
   st' <- io $ execStateT runXP st
 
   releaseXMF fs
