@@ -137,12 +137,12 @@ unsafeSpawn = spawn
 -- | Open a terminal emulator. The terminal emulator is specified in the default configuration as xterm by default. It is then
 -- asked to pass the shell a command with certain options. This is unsafe in the sense of 'unsafeSpawn'
 unsafeRunInTerm, runInTerm :: String -> String -> X ()
-unsafeRunInTerm options command = asks (terminal . config) >>= \t -> unsafeSpawn $ t ++ " " ++ options ++ " -e " ++ command
+unsafeRunInTerm options command = asks (terminal . config) >>= \t -> unsafeSpawn $ t ++ " " ++ options ++ " -e '" ++ command ++ "'"
 runInTerm = unsafeRunInTerm
 
 -- | Run a given program in the preferred terminal emulator; see 'runInTerm'. This makes use of 'safeSpawn'.
 safeRunInTerm :: String -> String -> X ()
-safeRunInTerm options command = asks (terminal . config) >>= \t -> safeSpawn t [options, " -e " ++ command]
+safeRunInTerm options command = asks (terminal . config) >>= \t -> safeSpawn t [options, "-e", command]
 
 -- | Launch an external application through the system shell and return a @Handle@ to its standard input.
 spawnPipe :: MonadIO m => String -> m Handle
