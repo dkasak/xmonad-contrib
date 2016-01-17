@@ -54,8 +54,16 @@ import XMonad.Prompt ( XPrompt
                      , mkXPrompt
                      , mkXPromptWithModes)
 import System.Directory (getHomeDirectory, doesDirectoryExist, getDirectoryContents)
-import System.FilePath (takeExtension, takeDirectory, takeFileName,
-                        dropExtension, combine, (</>), addTrailingPathSeparator)
+import System.FilePath ( takeExtension
+                       , takeDirectory
+                       , takeFileName
+                       , dropExtension
+                       , combine
+                       , (</>)
+                       , addTrailingPathSeparator
+                       , hasTrailingPathSeparator
+                       , pathSeparators
+                       , isRelative)
 import System.Posix.Env (getEnv)
 import XMonad.Util.Run (safeSpawn)
 
@@ -138,14 +146,17 @@ addTrailingIfDir path name = do
         else name
 
 passComplete :: String -> IO [String]
-passComplete s = do
-    store <- passwordStoreFolder
+passComplete s | s == pathSeparators || s == "." || s == ".." = (return . return) []
+               | otherwise =
+ do store <- passwordStoreFolder
     let path = store </> s
     exists <- doesDirectoryExist path
     if exists
-       then let contents = fmap (s </>) <$> getDirectoryContents' path
-                completions = join $ mapM (addTrailingIfDir store) <$> contents
-            in sort <$> completions
+       then if not (hasTrailingPathSeparator path) && not (null s)
+               then (return . return) (s ++ pathSeparators)
+               else let contents = fmap (s </>) <$> getDirectoryContents' path
+                        completions = join $ mapM (addTrailingIfDir store) <$> contents
+                    in sort <$> completions
        else let dir = takeDirectory path
                 initSegment' = takeDirectory s
                 initSegment = if initSegment' == "." then "" else initSegment'
